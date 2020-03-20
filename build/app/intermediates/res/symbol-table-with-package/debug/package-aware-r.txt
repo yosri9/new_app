@@ -1,0 +1,4 @@
+hyperionstudios.com.au.news_app
+drawable launch_background
+mipmap ic_launcher
+style LaunchTheme
