@@ -2,13 +2,18 @@ import 'dart:ui' as prefix0;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:news_app/api/posts-api.dart';
+import 'dart:async';
+import 'package:news_app/models/post.dart';
+import 'package:timeago/timeago.dart' as timeago;
 class WhatsNew extends StatefulWidget {
   @override
   _WhatsNewState createState() => _WhatsNewState();
 }
 
 class _WhatsNewState extends State<WhatsNew> {
+  
+  PostsAPI postsAPI=PostsAPI();
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView (
@@ -18,6 +23,7 @@ class _WhatsNewState extends State<WhatsNew> {
           children: <Widget>[
             _drawHeader(),
             _drawTopStories() ,
+            _drawRecentUpdates(),
 
 
           ],
@@ -78,39 +84,85 @@ class _WhatsNewState extends State<WhatsNew> {
         Padding(
           padding: EdgeInsets.all(8),
           child: Card(
-            child: Column(
-              children: <Widget>[
-                _drawSingleRow(),
-                _drawDivider(),
-                _drawSingleRow(),
-                _drawDivider(),
-                _drawSingleRow(),
-              ],
+            child: FutureBuilder(
+
+              future: postsAPI.fetchWhatsNew(),
+              // ignore: missing_return
+              builder:(context,AsyncSnapshot snapShot ){
+
+                switch(snapShot.connectionState){
+                  case ConnectionState.waiting:
+                    return _loading();
+                    break;
+                  case ConnectionState.active:
+                    return _loading();
+                    break;
+                  case ConnectionState.done:
+                    if (snapShot.error!=null){
+                    return _error(snapShot.error)
+                    }else{
+                      if(snapShot.hasData){
+                        List<Post> posts=snapShot.data;
+
+                        if (posts.length>3){
+                          Post post1=snapShot.data[0];
+                          Post post2=snapShot.data[1];
+                          Post post3=snapShot.data[2];
+
+                          return Column(
+                            children: <Widget>[
+                              _drawSingleRow(post1),
+                              _drawDivider(),
+                              _drawSingleRow(post2),
+                              _drawDivider(),
+                              _drawSingleRow(post3),
+                            ],
+                          );
+                        }else{
+                          return _noData();
+                        }
+
+                      }else{
+                       return _noData()   ;
+                      }
+                    }
+                    break;
+                  case ConnectionState.none:
+                  return _connectionError();
+                    break ;
+                }
+
+
+              } ,
+
             ),
           ),
 
 
 
         ),
-        Padding(
-          padding: EdgeInsets.only(left: 16, bottom: 8, top: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _drawSectionTitle('Recent Updates'),
-               _drawRecentUpdatesCard(Colors.deepOrange),
-              _drawRecentUpdatesCard(Colors.teal),
-              SizedBox(
-                height: 48,
-              )
-            ],
-          ),
-        )
+
       ],
     ),
   );
   }
-  Widget _drawSingleRow(){
+  Widget _drawRecentUpdates(){
+    return Padding(
+      padding: EdgeInsets.only(left: 16, bottom: 8, top: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _drawSectionTitle('Recent Updates'),
+          _drawRecentUpdatesCard(Colors.deepOrange),
+          _drawRecentUpdatesCard(Colors.teal),
+          SizedBox(
+            height: 48,
+          )
+        ],
+      ),
+    );
+  }
+  Widget _drawSingleRow(Post post){
     return
       Padding(
         padding: EdgeInsets.all(8) ,
@@ -122,7 +174,7 @@ class _WhatsNewState extends State<WhatsNew> {
                   child: Row(
                     children: <Widget>[
                       SizedBox(
-                        child: Image(image:  ExactAssetImage('assets/images/bg2.jpg') ,
+                        child: Image.network(post.featuredImage,
                           fit: BoxFit.cover,
                         ),
                         width: 124,
@@ -133,7 +185,8 @@ class _WhatsNewState extends State<WhatsNew> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween ,
                           children: <Widget>[
-                            Text('fdsfqfghdghdghhhhhhrtrhtrhtheh thrheth',
+                            Text(
+                              post.title,
                               maxLines: 2,
                               style: TextStyle(
                                   fontSize: 18,
@@ -148,7 +201,7 @@ class _WhatsNewState extends State<WhatsNew> {
                                 Row(
                                   children: <Widget>[
                                     Icon(Icons.timer) ,
-                                    Text('15 min', )
+                                    Text(_parseHumanDateTime(post.dateWritten) ),
                                   ],
                                 )
 
@@ -165,6 +218,12 @@ class _WhatsNewState extends State<WhatsNew> {
         ),
       )
       ;
+  }
+
+  String  _parseHumanDateTime(String dateTime){
+    Duration timeAgo =DateTime.now().difference(DateTime.parse(dateTime));
+    DateTime theDifference=DateTime.now().subtract(timeAgo);
+    return timeago.format(theDifference) ;
   }
 
  Widget _drawDivider() {
@@ -255,5 +314,32 @@ class _WhatsNewState extends State<WhatsNew> {
     );
   }
 
+  Widget _loading() {
+    return Container(
+      padding: EdgeInsets.only(top: 16 , bottom: 16),
+      child: Center(
+        child:  CircularProgressIndicator(),
+      ),
+    )
+
+  }
+  Widget _noData(){
+    return Container (
+      padding: EdgeInsets.all(16),
+      child:Text("No Data Available") ,
+    );
+  }
+  Widget _error(var error){
+    return Container (
+      padding: EdgeInsets.all(16),
+      child:Text(error.toString()) ,
+    );
+  }
+  Widget _connectionError(){
+    return Container (
+      padding: EdgeInsets.all(16),
+      child:Text("Connection Error!!!!") ,
+    );
+  }
 }
 
