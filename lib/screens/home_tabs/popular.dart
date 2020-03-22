@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:news_app/api/posts-api.dart';
+import 'package:news_app/models/post.dart';
+import 'package:news_app/utilities/data_utilities.dart';
 
 class Popular extends StatefulWidget {
   @override
@@ -6,19 +9,46 @@ class Popular extends StatefulWidget {
 }
 
 class _PopularState extends State<Popular> {
+  PostsAPI postsAPI=PostsAPI();
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemBuilder:  (context, position){
-          return Card(
-            child: _drawSingleRow() ,
-          );
-    },
-    itemCount: 20,
-      );
+    return FutureBuilder(
+      future: postsAPI.fetchPostsByCategoryId("3"),
+      // ignore: missing_return
+      builder: (context ,AsyncSnapshot snapShot){
+        switch (snapShot.connectionState){
+          case ConnectionState.none:
+            return connectionError();
+            break;
+          case ConnectionState.waiting:
+            return loading();
+            break;
+          case ConnectionState.active:
+            return loading();
+            break;
+          case ConnectionState.done:
+            if(snapShot.hasError){
+              return error(snapShot.error);
+            }else{
+              List<Post> posts=snapShot.data;
+              return ListView.builder(
+                itemBuilder:  (context, position){
+                  return Card(
+                    child: _drawSingleRow(posts[position]) ,
+                  );
+                },
+                itemCount: 20,
+              );
+
+            }
+
+            break;
+        }
+      }
+    );
   }
 
-  Widget _drawSingleRow(){
+  Widget _drawSingleRow(Post post){
     return
       Padding(
         padding: EdgeInsets.all(8) ,
@@ -30,7 +60,9 @@ class _PopularState extends State<Popular> {
                   child: Row(
                     children: <Widget>[
                       SizedBox(
-                        child: Image(image:  ExactAssetImage('assets/images/bg2.jpg') ,
+                        child: Image(
+                      image: NetworkImage(post.featuredImage,
+                  ) ,
                           fit: BoxFit.cover,
                         ),
                         width: 124,
@@ -41,7 +73,7 @@ class _PopularState extends State<Popular> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween ,
                           children: <Widget>[
-                            Text('fdsfqfghdghdghhhhhhrtrhtrhtheh thrheth',
+                            Text(post.title,
                               maxLines: 2,
                               style: TextStyle(
                                   fontSize: 18,
@@ -56,7 +88,7 @@ class _PopularState extends State<Popular> {
                                 Row(
                                   children: <Widget>[
                                     Icon(Icons.timer) ,
-                                    Text('15 min', )
+                                    Text(parseHumanDateTime(post.dateWritten), )
                                   ],
                                 )
 
