@@ -5,8 +5,8 @@ import 'package:news_app/models/post.dart';
 
 
 class PostsAPI{
-  Future <List<Post>> fetchWhatsNew() async {
-    String whatsNewApi = base_api + whats_NewApi;
+  Future <List<Post>> fetchRecentUpdates() async {
+    String whatsNewApi = base_api + recent_updates_api;
     var response = await http.get(whatsNewApi);
     List<Post> posts = List<Post>();
     if (response.statusCode == 200) {

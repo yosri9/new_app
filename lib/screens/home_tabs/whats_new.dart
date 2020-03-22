@@ -86,7 +86,7 @@ class _WhatsNewState extends State<WhatsNew> {
           child: Card(
             child: FutureBuilder(
 
-              future: postsAPI.fetchWhatsNew(),
+              future: postsAPI.fetchRecentUpdates(),
               // ignore: missing_return
               builder:(context,AsyncSnapshot snapShot ){
 
@@ -99,7 +99,7 @@ class _WhatsNewState extends State<WhatsNew> {
                     break;
                   case ConnectionState.done:
                     if (snapShot.error!=null){
-                    return _error(snapShot.error)
+                    return _error(snapShot.error);
                     }else{
                       if(snapShot.hasData){
                         List<Post> posts=snapShot.data;
@@ -148,17 +148,42 @@ class _WhatsNewState extends State<WhatsNew> {
   }
   Widget _drawRecentUpdates(){
     return Padding(
-      padding: EdgeInsets.only(left: 16, bottom: 8, top: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _drawSectionTitle('Recent Updates'),
-          _drawRecentUpdatesCard(Colors.deepOrange),
-          _drawRecentUpdatesCard(Colors.teal),
-          SizedBox(
-            height: 48,
-          )
-        ],
+      padding: EdgeInsets.all(8),
+      child: FutureBuilder(
+        // ignore: missing_return
+        future: postsAPI.fetchRecentUpdates(),
+        // ignore: missing_return
+        builder:(context , AsyncSnapshot snapShot) {
+          switch (snapShot.connectionState){
+            case ConnectionState.none:
+              return _connectionError();
+              break;
+            case ConnectionState.active :
+              return _loading();
+              break;
+            case ConnectionState.waiting:
+              return _loading();
+              break;
+            case ConnectionState.done:
+              if (snapShot.hasError){
+                return _error(snapShot.error);
+              }else{
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _drawSectionTitle('Recent Updates'),
+                    _drawRecentUpdatesCard(Colors.deepOrange,snapShot.data[0]),
+                    _drawRecentUpdatesCard(Colors.teal,snapShot.data[1]),
+                    SizedBox(
+                      height: 48,
+                    )
+                  ],
+                );
+
+              }
+              break;
+          }
+        }
       ),
     );
   }
@@ -245,7 +270,7 @@ class _WhatsNewState extends State<WhatsNew> {
     );
   }
 
-  Widget _drawRecentUpdatesCard(Color Color) {
+  Widget _drawRecentUpdatesCard(Color color , Post post) {
     return Card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +278,7 @@ class _WhatsNewState extends State<WhatsNew> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                  image: ExactAssetImage('assets/images/bg4.jpg'),
+                  image: NetworkImage(post.featuredImage),
                 fit: BoxFit.cover,
               )
             ),
@@ -266,7 +291,7 @@ class _WhatsNewState extends State<WhatsNew> {
             child: Container(
               padding: EdgeInsets.only(left: 24 , right: 24 ,top: 4 , bottom: 0.1),
               decoration: BoxDecoration(
-                color: Color,
+                color: color,
                 borderRadius: BorderRadius.circular(4)
               ),
 
@@ -280,7 +305,7 @@ class _WhatsNewState extends State<WhatsNew> {
           ),
           Padding(
               padding: EdgeInsets.only(top: 0, left: 16 ,right: 16 ,bottom: 8),
-              child: Text('Vettel is ferrari number one - hamilton',
+              child: Text(post.title,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600
@@ -298,7 +323,7 @@ class _WhatsNewState extends State<WhatsNew> {
                   ),
                   SizedBox(width:8,),
                   Text(
-                      '15 Min',
+                      _parseHumanDateTime(post.dateWritten),
                       style: TextStyle(
                         color:Colors.grey,
                         fontSize: 14
@@ -320,7 +345,7 @@ class _WhatsNewState extends State<WhatsNew> {
       child: Center(
         child:  CircularProgressIndicator(),
       ),
-    )
+    );
 
   }
   Widget _noData(){
