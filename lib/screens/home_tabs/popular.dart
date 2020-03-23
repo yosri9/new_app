@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:news_app/api/posts-api.dart';
 import 'package:news_app/models/post.dart';
+import 'package:news_app/screens/single_post.dart';
 import 'package:news_app/utilities/data_utilities.dart';
 
 class Popular extends StatefulWidget {
@@ -52,55 +53,64 @@ class _PopularState extends State<Popular> {
     return
       Padding(
         padding: EdgeInsets.all(8) ,
-        child: Card(
-          child: Column(
-              children : <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Row(
-                    children: <Widget>[
-                      SizedBox(
-                        child: Image(
-                      image: NetworkImage(post.featuredImage,
-                  ) ,
-                          fit: BoxFit.cover,
+        child: GestureDetector(
+          onTap: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context){
+            return SinglePost(post);
+            }
+            )
+            );
+          },
+          child: Card(
+            child: Column(
+                children : <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: <Widget>[
+                        SizedBox(
+                          child: Image(
+                        image: NetworkImage(post.featuredImage,
+                    ) ,
+                            fit: BoxFit.cover,
+                          ),
+                          width: 124,
+                          height: 124,
                         ),
-                        width: 124,
-                        height: 124,
-                      ),
-                      SizedBox(width: 16,),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween ,
-                          children: <Widget>[
-                            Text(post.title,
-                              maxLines: 2,
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600
+                        SizedBox(width: 16,),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween ,
+                            children: <Widget>[
+                              Text(post.title,
+                                maxLines: 2,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 16,),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text('fgdfgsfg'),
-                                Row(
-                                  children: <Widget>[
-                                    Icon(Icons.timer) ,
-                                    Text(parseHumanDateTime(post.dateWritten), )
-                                  ],
-                                )
+                              SizedBox(height: 16,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Text(post.title),
+                                  Row(
+                                    children: <Widget>[
+                                      Icon(Icons.timer) ,
+                                      Text(parseHumanDateTime(post.dateWritten), )
+                                    ],
+                                  )
 
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    ],
+                                ],
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ]
+                ]
+            ),
           ),
         ),
       )

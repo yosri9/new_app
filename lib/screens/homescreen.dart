@@ -5,6 +5,10 @@ import 'home_tabs/favourites.dart';
 import 'home_tabs/popular.dart';
 import 'package:news_app/api/authors_api.dart';
 import 'package:news_app/api/categories_api.dart';
+import 'package:news_app/pages/about.dart';
+import 'package:news_app/pages/setting.dart';
+import 'package:news_app/pages/help.dart';
+import 'package:news_app/pages/contact.dart';
 
 class homescreen extends StatefulWidget {
   @override
@@ -81,6 +85,37 @@ class _homescreenState extends State<homescreen> with SingleTickerProviderStateM
 
         )];
     }, onSelected: (PopOutMenu menu){
+      switch(menu){
+        case PopOutMenu.ABOUT:
+          Navigator.push(context, MaterialPageRoute(builder: (context){
+            return AboutUs();
+          }
+          )
+          );
+          break;
+        case PopOutMenu.SETTING:
+          Navigator.push(context, MaterialPageRoute(builder: (context){
+            return Settings();
+          }
+          )
+          );
+          break;
+        case PopOutMenu.HELP:
+          Navigator.push(context, MaterialPageRoute(builder: (context){
+            return Help();
+          }
+          )
+          );
+          break;
+        case PopOutMenu.CONTACT:
+          Navigator.push(context, MaterialPageRoute(builder: (context){
+            return ContactUs();
+          }
+          )
+          );
+          break;
+
+      }
 
     },
     );
