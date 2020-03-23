@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as prefix0;
 
 import 'package:flutter/cupertino.dart';
@@ -42,30 +43,71 @@ class _WhatsNewState extends State<WhatsNew> {
       fontSize: 18
     ) ;
 
-    return Container(
-        width: MediaQuery.of(context).size.width,
-        height:  MediaQuery.of(context).size.height*0.25,
-        decoration: BoxDecoration(
-          image:DecorationImage(
-              image: ExactAssetImage('assets/images/bg.jpg'),
-              fit:BoxFit.cover
+    return FutureBuilder(
+      future: postsAPI.fetchPostsByCategoryId("1"),
+    // ignore: missing_return
+    builder: (context ,AsyncSnapshot snapShot){
+     switch(snapShot.connectionState){
+       case ConnectionState.waiting:
+         return loading();
+         break;
+       case ConnectionState.active:
+         return loading();
+         break;
+       case ConnectionState.done:
 
-          ),
+         if (snapShot.hasError){
+             return error(snapShot.error);
+           }else{
+            List<Post> posts= snapShot.data;
+            Random random = Random();
+            int randomIndex = random.nextInt(posts.length);
+            Post post =posts[randomIndex];
+            return Container(
+                width: MediaQuery.of(context).size.width,
+                height:  MediaQuery.of(context).size.height*0.25,
+                decoration: BoxDecoration(
+                  image:DecorationImage(
+                      image:NetworkImage(post.featuredImage),
+                      fit:BoxFit.cover
 
-        ),
-        child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("sdqdqsqsdqsddsf", style: _headerTitle,textAlign: TextAlign.center,),
-                SizedBox(height:8,),
-                Padding(
-                  padding: const EdgeInsets.only(left:34 , right: 34),
-                  child: Text("sdqdqsqsdqsdsssssssssssss ssdsssssssssssssssssssdsf",style: _headerDescription,textAlign: TextAlign.center,),
+                  ),
+
                 ),
-              ],
-            )
-        )
+                child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Padding(
+                          padding: EdgeInsets.only(left: 46 , right: 46),
+                           child: Text(post.title, style: _headerTitle,textAlign: TextAlign.center,),
+                    ),
+                      SizedBox(height:8,),
+
+
+                      Padding(
+                          padding: const EdgeInsets.only(left:34 , right: 34),
+                          child: Text(
+                            post.content.substring(0,75),
+                              style: _headerDescription,
+                            textAlign: TextAlign.center
+                          ),
+                        ),
+                      ],
+                    )
+                )
+            );
+           }
+         break;
+
+
+       case ConnectionState.none:
+         error(snapShot.error);
+         break;
+
+     }
+
+    }
     ) ;
   }
 
