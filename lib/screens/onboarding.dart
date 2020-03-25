@@ -42,7 +42,7 @@ class _OnBoardingState extends State<OnBoarding> {
                 children: <Widget>[
                   Scaffold(
                     body: PageView.builder(
-                      itemBuilder: (Context, index) {
+                      itemBuilder: (context, index) {
                         return Stack(
                           children: <Widget>[
                             Container(
