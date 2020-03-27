@@ -9,6 +9,14 @@ class _FacebookFeedsState extends State<FacebookFeeds> {
   TextStyle _hashTagStyle=TextStyle(
     color: Colors.orange,
   );
+  List <int> ids=[];
+
+  @override
+  void initState() {
+    super.initState();
+    ids=[0,2,5];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +35,7 @@ class _FacebookFeedsState extends State<FacebookFeeds> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _drawHeader(),
+                _drawHeader(position),
                 _drawTitle(),
                 _drawHashTags(),
                 _drawBody(),
@@ -45,7 +53,7 @@ class _FacebookFeedsState extends State<FacebookFeeds> {
   }
 
 
-  Widget _drawHeader() {
+  Widget _drawHeader(int position) {
 
 
     return Row(
@@ -81,8 +89,16 @@ class _FacebookFeedsState extends State<FacebookFeeds> {
             IconButton(
               icon: Icon(Icons.favorite
               ),
-              onPressed: (){} ,
-              color: Colors.grey.shade400,
+              onPressed: (){
+              setState(() {
+                if (ids.contains([position])){
+                  ids.remove(position);
+                }else{
+                  ids.add(position);
+                }
+              });
+              } ,
+              color:(ids.contains(position))? Colors.red: Colors.grey.shade400,
             ),
             Transform.translate(
               offset: Offset(-12, 0),

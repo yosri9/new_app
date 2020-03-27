@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:news_app/screens/facebook_feeds.dart';
 import 'package:news_app/screens/instagram_feed.dart';
@@ -6,6 +8,10 @@ import 'package:news_app/shared_ui/navigation_drawer.dart';
 import 'package:news_app/models/nav_menu.dart';
 import 'package:news_app/screens/homescreen.dart';
 import 'package:news_app/screens/headline_news.dart';
+import 'package:news_app/utilities/app_utilities.dart';
+import 'package:news_app/pages/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 
 class NavigationDrawer extends StatefulWidget {
@@ -14,25 +20,53 @@ class NavigationDrawer extends StatefulWidget {
 }
 
 class _NavigationDrawerState extends State<NavigationDrawer> {
-
+    static bool isLoggedIn=false;
+    String token;
+    SharedPreferences sharedPreferences;
   List<NavMenuItem> navigationMenu=[
     NavMenuItem("Explore",()=> homescreen() ),
     NavMenuItem("headLine News" ,()=> HeadLineNews()),
     NavMenuItem("Twitter Feeds", ()=> TwitterFeed()),
     NavMenuItem("Instagram Feeds", ()=>InstagramFeed()),
     NavMenuItem("Facebook Feeds", ()=>FacebookFeeds()),
+   // NavMenuItem("Login", ()=>Login()),
+
+    //NavMenuItem("Login",()=>FacebookFeeds()),
+    //NavMenuItem("Register",()=>FacebookFeeds()),
   ];
-  List <String> navMenu=[
-    'Explore',
-    'Headline News',
-    'Read Later',
-    'Videos',
-    'Photos' ,
-    'Setting',
-    'Logout',
-  ];
+  _checkToken()async{
+     sharedPreferences= await SharedPreferences.getInstance();
+    token=sharedPreferences.get('token');
+   setState(() {
+     if(token==null){
+       isLoggedIn=false ;
+
+     }else{
+       isLoggedIn=true;
+     }
+   });
+  }
+  _logout(){
+    if(this.mounted){
+      if(sharedPreferences!=null){
+        sharedPreferences.remove('token');
+    }
+  return homescreen();
+  }
+  }
   @override
+  void initState(){
+    super.initState();
+    if(isLoggedIn){
+      navigationMenu.add(NavMenuItem("Logout", _logout));
+    }
+
+
+  }
   Widget build(BuildContext context) {
+    if(this.mounted){
+      _checkToken();
+    }
     return Drawer(
       child: Padding(
         padding: EdgeInsets.only(top: 75 ,left: 24),
